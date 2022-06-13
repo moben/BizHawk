@@ -97,7 +97,7 @@ let
 		version = hawkSourceInfo.version;
 		exeName = "${pname}-${version}";
 		nativeBuildInputs = [ makeWrapper ];
-		buildInputs = [ bizhawkAssemblies ];
+		buildInputs = [ bizhawkAssemblies mono ];
 		# there must be a helper for this somewhere...
 		dontUnpack = true;
 		dontPatch = true;
