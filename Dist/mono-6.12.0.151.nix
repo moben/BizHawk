@@ -1,12 +1,8 @@
-{ mono, fetchFromGitHub }:
-mono.overrideAttrs (old: rec {
+{ pkgs, fetchurl }:
+pkgs.mono.overrideAttrs (old: rec {
 	version = "6.12.0.151";
-	src = fetchFromGitHub {
-		owner = "mono";
-		repo = "mono";
-		rev = "mono-${version}";
-		hash = "sha256-rdItM+O6PLQlxPNhMVFpXxRN0XWMC/jcxEeOBNoLo8c=";
-		fetchSubmodules = true;
+	src = fetchurl {
+		url = "https://download.mono-project.com/sources/mono/preview/mono-${version}.tar.xz";
+		sha256 = "sha256-yVh4VQuOgh2Qtxd6YMTaq1iLfwaSZMzlJAJQEU9GdDg=";
 	};
-	nativeBuildInputs = old.nativeBuildInputs ++ [ mono ];
 })
