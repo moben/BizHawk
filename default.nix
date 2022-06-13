@@ -1,7 +1,7 @@
 # THIS IS A WORK IN PROGRESS!
 # To save you having to build Mono locally, install the Cachix client (`nix-env -iA nixpkgs.cachix`) and run `cachix use mono-for-bizhawk` (both commands only need to run once ever). See https://docs.cachix.org for more info.
 
-{ pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/21.11.tar.gz") {}
+{ pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/22.05.tar.gz") {}
 # infrastructure
 , stdenv ? pkgs.stdenvNoCC
 , buildDotnetModule ? pkgs.buildDotnetModule
