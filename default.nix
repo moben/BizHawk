@@ -10,11 +10,11 @@
 , makeWrapper ? pkgs.makeWrapper
 # source
 , useCWDAsSource ? false # deprecated
-, hawkSourceInfoDev ? rec {
+, hawkSourceInfoDev ? {
 	version = "2.8.1-local"; # distinguishes parallel installs' config and other data
 	shorthash = "000000000"; # this and the branch name are written into movies and savestates, written to config to detect in-place upgrades (N/A to Nix), and of course also shown in the About dialog
 	branch = "master"; # must be regex-escaped (interpolated as `sed "s/.../${branch}/"`)
-	drv = builtins.path { path = ./.; name = "BizHawk-${version}"; }; # did have filter here for speed, but it wasn't faster and it wasn't correct and it couldn't be made correct and I'm mad
+	drv = pkgs.nix-gitignore.gitignoreSource [] ./.;
 }
 # makedeps
 , dotnet-sdk_5 ? pkgs.dotnetCorePackages.sdk_5_0
