@@ -23,7 +23,7 @@
 #, gtk2-x11 ? pkgs.gtk2-x11
 # rundeps for all Linux hosts
 , mesa ? pkgs.mesa
-, mono ? null
+, mono ? if (pkgs.lib.versionAtLeast pkgs.mono.version "6.12.0.151") then pkgs.mono else pkgs.callPackage Dist/mono-6.12.0.151.nix {}
 , openal ? pkgs.openal
 , uname ? stdenv
 # other parameters
@@ -36,19 +36,13 @@
 let
 	lib = pkgs.lib;
 	commentUnless = b: lib.optionalString (!b) "# ";
-	versionAtLeast = exVer: acVer: builtins.compareVersions exVer acVer <= 0;
-	monoFinal = if mono != null
-		then mono
-		else if versionAtLeast "6.12.0.151" pkgs.mono.version
-			then pkgs.mono
-			else pkgs.callPackage Dist/mono-6.12.0.151.nix {}; # not actually reproducible :( https://github.com/NixOS/nixpkgs/issues/143110#issuecomment-984251253
 	buildAssembliesFor = hawkSourceInfo: buildDotnetModule rec {
 		pname = "BizHawk";
 		version = hawkSourceInfo.version;
 		src = hawkSourceInfo.drv;
 		outputs = [ "bin" "out" ];
 		dotnet-sdk = if hawkSourceInfo ? dotnet-sdk then hawkSourceInfo.dotnet-sdk else dotnet-sdk_6;
-		buildInputs = [ mesa monoFinal openal uname ];# ++ lib.optionals (forNixOS) [ gtk2-x11 ];
+		buildInputs = [ mesa mono openal uname ];# ++ lib.optionals (forNixOS) [ gtk2-x11 ];
 		projectFile = "BizHawk.sln";
 		nugetDeps = if hawkSourceInfo ? nugetDeps then hawkSourceInfo.nugetDeps else Dist/deps.nix;
 		extraDotnetBuildFlags = "-maxcpucount:$NIX_BUILD_CORES -p:BuildInParallel=true --no-restore";
@@ -93,10 +87,10 @@ let
 	};
 	wrapperScriptsFor = { hawkSourceInfo, bizhawkAssemblies }: import Dist/wrapper-scripts.nix {
 		inherit (pkgs) lib writeShellScriptBin writeText;
-		inherit commentUnless versionAtLeast mesa openal debugPInvokes initConfig;
+		inherit commentUnless mesa openal debugPInvokes initConfig;
 		bizhawk = bizhawkAssemblies;
 		hawkVersion = hawkSourceInfo.version;
-		mono = monoFinal;
+		mono = mono;
 	};
 	mkWrapperWrapper = { hawkSourceInfo, bizhawkAssemblies, pname, innerWrapper, desktopName }: stdenv.mkDerivation rec {
 		inherit pname;
@@ -140,6 +134,7 @@ let
 		desktopName = "EmuHawk (Mono Runtime)";
 	};
 in rec {
+	inherit mono;
 	bizhawkAssemblies = buildAssembliesFor hawkSourceInfoDev; # assemblies and dependencies, and some other immutable things like the gamedb, are in the `bin` output; the rest of the "assets" (bundled scripts, palettes, etc.) are in the `out` output
 	discohawk = buildDiscoHawkWrapperFor { inherit bizhawkAssemblies; hawkSourceInfo = hawkSourceInfoDev; };
 	emuhawk-2_7 = buildEmuHawkWrapperFor {
@@ -172,5 +167,4 @@ in rec {
 	};
 	emuhawk = buildEmuHawkWrapperFor { inherit bizhawkAssemblies; hawkSourceInfo = hawkSourceInfoDev; };
 	emuhawkWrapperScriptNonNixOS = (wrapperScriptsFor { inherit bizhawkAssemblies; hawkSourceInfo = hawkSourceInfoDev; }).wrapperScriptNonNixOS;
-	mono = monoFinal;
 }

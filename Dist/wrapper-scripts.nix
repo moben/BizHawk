@@ -1,7 +1,6 @@
 { lib
 # infrastructure
 , commentUnless
-, versionAtLeast
 , writeShellScriptBin
 , writeText
 # rundeps
@@ -34,7 +33,7 @@ let
 		LastWrittenFrom = if builtins.length (builtins.splitVersion hawkVersion) < 3 then "${hawkVersion}.0" else hawkVersion;
 		PathEntries = {
 			Paths = [
-				({ "System" = "Global_NULL"; Type = "Base"; Path = "%%BIZHAWK_DATA_HOME%%"; } // lib.optionalAttrs (!versionAtLeast "2.7.1" hawkVersion) { "Ordinal" = 1; })
+				({ "System" = "Global_NULL"; Type = "Base"; Path = "%%BIZHAWK_DATA_HOME%%"; } // lib.optionalAttrs (!lib.versionAtLeast "2.7.1" hawkVersion) { "Ordinal" = 1; })
 			];
 		};
 	} // initConfig));
